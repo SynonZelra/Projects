@@ -1,0 +1,45 @@
+# Projects#include <HID-Project.h>
+
+#define ctrl 14
+#define del 16
+#define alt 10
+
+void setup()
+{
+  pinMode(ctrl,INPUT_PULLUP);
+  pinMode(del,INPUT_PULLUP);
+  pinMode(alt,INPUT_PULLUP);
+  NKROKeyboard.begin();  
+}
+
+void loop()
+{
+  if (!digitalRead(ctrl))
+  {
+    NKROKeyboard.add(KEY_LEFT_CTRL);
+  }
+  else
+  {
+    NKROKeyboard.release(KEY_LEFT_CTRL);
+  }
+
+  if (!digitalRead(del))
+  {
+    NKROKeyboard.add(KEY_DELETE);
+  }
+  else
+  {
+    NKROKeyboard.release(KEY_DELETE);
+  }
+
+  if (!digitalRead(alt))
+  {
+    NKROKeyboard.add(KEY_LEFT_ALT);
+  }
+  else
+  {
+    NKROKeyboard.release(KEY_LEFT_ALT                                                                                                                                               );
+  }
+
+  NKROKeyboard.send();
+}
