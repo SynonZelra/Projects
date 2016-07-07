@@ -1,0 +1,14 @@
+#define pn 10
+int i =0;
+
+void setup()
+{
+  pinMode(pn,OUTPUT);
+}
+
+void loop()
+{
+  for (i=0;i<=360;i++)
+  {analogWrite(pn,255*sin(i*PI/360));
+  delay(10);}
+}
