@@ -9,6 +9,8 @@ void setup()
 void loop()
 {
   for (i=0;i<=360;i++)
-  {analogWrite(pn,255*sin(i*PI/360));
-  delay(10);}
+  {
+    analogWrite(pn,255*sin(i*PI/360));
+    delay(10);
+  }
 }
