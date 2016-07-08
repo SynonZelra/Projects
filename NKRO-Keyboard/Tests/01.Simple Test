@@ -38,7 +38,7 @@ void loop()
   }
   else
   {
-    NKROKeyboard.release(KEY_LEFT_ALT                                                                                                                                               );
+    NKROKeyboard.release(KEY_LEFT_ALT);
   }
 
   NKROKeyboard.send();
