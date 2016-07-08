@@ -1,0 +1,32 @@
+#include <Wire.h>
+int light = 0;
+
+void setup()
+{
+  Wire.begin(5);
+  Wire.onReceive(receiveEvent);
+  pinMode(13,OUTPUT);
+  digitalWrite(13,LOW);
+}
+
+void loop()
+{
+  while(light>0)
+  {
+    analogWrite(13,light);
+    light=light-10;
+    delay(20);
+  }
+}
+
+void receiveEvent (int howMany)
+{
+  while (Wire.available())
+  {
+    char c = Wire.read();
+    if(c=='H')
+    {
+      light=255;
+    }
+  }
+}
