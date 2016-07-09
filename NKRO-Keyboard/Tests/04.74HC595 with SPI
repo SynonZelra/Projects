@@ -1,0 +1,29 @@
+#include <SPI.h>
+
+int i;
+
+void setup()
+{
+  pinMode(15,OUTPUT);
+  pinMode(16,OUTPUT);
+  pinMode(10,OUTPUT);
+
+  SPI.setBitOrder(MSBFIRST);
+  SPI.setDataMode(SPI_MODE0);
+  SPI.setClockDivider(SPI_CLOCK_DIV2);
+  SPI.begin();
+  SPI.transfer(0);
+  digitalWrite(10,HIGH);
+  digitalWrite(10,LOW);
+}
+
+void loop()
+{
+  for (i=0;i<4;i++)
+  {
+    SPI.transfer(i);
+    digitalWrite(10,HIGH);
+    digitalWrite(10,LOW);
+    delay(500);
+  }
+}
