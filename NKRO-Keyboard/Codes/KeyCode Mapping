@@ -1,0 +1,40 @@
+#include <HID-Project.h>
+#include <SPI.h>
+
+#define latch 10
+
+int transfer1[]={255,255,255,255,255,255,255,255,254,253,251,247,239,223,191,127};
+int transfer2[]={254,253,251,247,239,223,191,127,255,255,255,255,255,255,255,255};
+
+uint8_t keycode[6][16]=
+{
+{41,0x3A,0x3B,0x3C,0x3D,0x3E,0x3F,0x40,0x41,0x42,0x43,0x44,0x45,0x46,0x4C,0x4E},
+{53,30,31,32,33,34,35,36,37,38,39,45,46,42,0x53,0x54},
+{43,20,26,8,21,23,28,24,12,18,19,0x2F,0x30,49,0x5f,0x60},
+{0x39,4,22,7,9,10,11,13,14,15,51,52,40,0x5C,0x5D,0x5E},
+{0xE1,29,27,6,25,5,17,16,54,55,56,0x52,0xE5,0x59,0x5A,0x5B},
+{0xE1,0xE3,0xE2,44,0x65,0x50,0x51,0x4F,0x62,0x63,0x58,0x57,0x56,0x61,0x55,0x54}
+};
+
+int diginumber;
+
+void setup()
+{
+  pinMode(15,OUTPUT);
+  pinMode(16,OUTPUT);
+  pinMode(10,OUTPUT);
+
+  SPI.setBitOrder(MSBFIRST);
+  SPI.setDataMode(SPI_MODE0);
+  SPI.setClockDivider(SPI_CLOCK_DIV2);
+  
+  SPI.begin();
+  Serial.begin(9600);
+  NKROKeyboard.begin();
+  Consumer.begin();
+}
+
+void loop()
+{
+  
+}
