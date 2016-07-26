@@ -103,15 +103,13 @@ void loop()
   
   NKROKeyboard.send();
 
-  if (!digitalRead(specpin[0])
+  if (!digitalRead(specpin[0]))
   {Consumer.press(ConsumerKeycode(0xEA));}
   else
   {Consumer.release(ConsumerKeycode(0xEA));}
 
-  if (!digitalRead(specpin[0])
+  if (!digitalRead(specpin[0]))
   {Consumer.press(ConsumerKeycode(0xE9));}
   else
   {Consumer.release(ConsumerKeycode(0xE9));}
-  
-  Consumer.send();
 }
