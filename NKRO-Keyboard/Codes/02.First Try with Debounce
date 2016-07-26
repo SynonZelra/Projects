@@ -102,4 +102,14 @@ void loop()
   }
   
   NKROKeyboard.send();
+
+  if (!digitalRead(specpin[0])
+  {Consumer.press(ConsumerKeycode(0xEA));}
+  esle
+  {Consumer.release(ConsumerKeycode(0xEA));}
+
+  if (!digitalRead(specpin[0])
+  {Consumer.press(ConsumerKeycode(0xE9));}
+  esle
+  {Consumer.release(ConsumerKeycode(0xE9));}
 }
