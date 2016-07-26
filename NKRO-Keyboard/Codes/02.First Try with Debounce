@@ -112,4 +112,6 @@ void loop()
   {Consumer.press(ConsumerKeycode(0xE9));}
   else
   {Consumer.release(ConsumerKeycode(0xE9));}
+  
+  Consumer.send();
 }
