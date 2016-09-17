@@ -1,0 +1,19 @@
+#include "HID-Project.h"
+
+void setup()
+{
+  pinMode(9,INPUT_PULLUP);
+  NKROKeyboard.begin();
+}
+
+void loop()
+{
+  if (!digitalRead(9))
+  {
+    NKROKeyboard.press(KeyboardKeycode(4));
+  }
+  else
+  {
+    NKROKeyboard.release(KeyboardKeycode(4));
+  }
+}
