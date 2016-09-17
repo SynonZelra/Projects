@@ -1,0 +1,21 @@
+#include "HID-Project.h"
+
+#define pb5 bitRead(PINB,5)
+
+void setup()
+{
+  pinMode(9,INPUT_PULLUP);
+  NKROKeyboard.begin();
+}
+
+void loop()
+{
+  if (!pb5)
+  {
+    NKROKeyboard.press(KeyboardKeycode(4));
+  }
+  else
+  {
+    NKROKeyboard.release(KeyboardKeycode(4));
+  }
+}
