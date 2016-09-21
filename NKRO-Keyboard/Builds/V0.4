@@ -1,0 +1,28 @@
+#include "HID-Project.h"
+#include "SPI.h"
+
+bool stat = 0;
+
+void setup()
+{
+  SPI.begin();
+  pinMode(9,INPUT_PULLUP);
+  Keyboard.begin();
+}
+
+void loop()
+{
+  SPI.transfer(0);
+  digitalWrite(10,HIGH);
+  digitalWrite(10,LOW);
+  if ( stat==0 && digitalRead(9)==0)
+  {
+    Keyboard.press('a');
+    stat=!stat;
+  }
+  if ( stat==1 && digitalRead(9)==1)
+  {
+    Keyboard.release('a');
+    stat=!stat;
+  }
+}
