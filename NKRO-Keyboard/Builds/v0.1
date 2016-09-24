@@ -1,0 +1,34 @@
+#include "SPI.h"
+#include "HID-Project.h"
+
+byte datafetch;
+bool keystatue = 0;
+
+void setup()
+{
+  Serial.begin(9600);
+  //pin10 for latch of 74HC165N
+  pinMode(10,OUTPUT);
+  digitalWrite(10,HIGH);
+
+  //SPI setting
+  SPI.setClockDivider(SPI_CLOCK_DIV128);
+  SPI.setDataMode(SPI_MODE0);
+  SPI.setBitOrder(MSBFIRST);
+  SPI.begin();
+
+  NKROKeyboard.begin();
+}
+
+void loop()
+{
+  //latch the input
+  digitalWrite(10,LOW);
+  digitalWrite(10,HIGH);
+  //transfer to get data
+  datafetch = SPI.transfer(0x00);
+
+  //keypress
+  Serial.println(bitRead(datafetch,0));
+  delay(200);
+}
