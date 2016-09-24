@@ -1,0 +1,52 @@
+#include "SPI.h"
+#include "HID-Project.h"
+
+byte datafetch;
+bool keystate = 0;
+uint8_t code = 4;
+
+void setup()
+{
+  //pin10 for latch of 74HC165N
+  pinMode(10,OUTPUT);
+  digitalWrite(10,HIGH);
+
+  //SPI setting
+  SPI.setClockDivider(SPI_CLOCK_DIV128);
+  SPI.setDataMode(SPI_MODE0);
+  SPI.setBitOrder(MSBFIRST);
+  SPI.begin();
+
+  NKROKeyboard.begin();
+}
+
+void loop()
+{
+  scan();
+
+  //keypress
+  if ( keystate != bitRead(datafetch,0) )
+  {
+    switch (keystate)
+    {
+      case 0:
+        NKROKeyboard.press(KeyboardKeycode(code));
+        keystate=1;
+        break;
+      case 1:
+        NKROKeyboard.release(KeyboardKeycode(code));
+        keystate=0;
+        break;
+    }
+    delay(5);
+  }
+}
+
+void scan()
+{
+  //latch the input
+  digitalWrite(10,LOW);
+  digitalWrite(10,HIGH);
+  //transfer to get data
+  datafetch = SPI.transfer(0x00);
+}
