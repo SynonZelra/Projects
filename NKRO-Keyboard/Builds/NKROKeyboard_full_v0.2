@@ -1,0 +1,67 @@
+//libs
+#include "SPI.h"
+//variants
+bool state[] = {0,0,0,0,0};
+byte input;
+int rows,columns;
+
+void setup()
+{
+  //latch for 74HC165
+  pinMode(10,OUTPUT);
+  digitalWrite(10,HIGH);
+  //rows
+  pinMode(9,OUTPUT);
+  digitalWrite(9,HIGH);
+  //begin SPI
+  SPI.setClockDivider(SPI_CLOCK_DIV128);
+  SPI.setDataMode(SPI_MODE0);
+  SPI.setBitOrder(MSBFIRST);
+  SPI.begin();
+  //Serial for debugging
+  Serial.begin(9600);
+}
+
+void loop()
+{
+  //latch the inputs
+  scan();
+  //check column by column
+  for (columns=0;columns<5;columns++)
+  {
+    check(0,columns);
+  }
+}
+
+//read inputs
+void scan()
+{
+  digitalWrite(10,LOW);
+  delay(1);
+  digitalWrite(10,HIGH);
+  //sent anything to read from SPI
+  input = SPI.transfer(0x00);
+}
+
+//check for inputs
+void check(int var_a, int var_b)
+{
+  if ( state[var_b] != bitRead(input,var_b) )
+  {
+    switch(state[var_b])
+    {
+      case 0:
+        Serial.print(var_b);
+        Serial.println(" Pressed");
+        state[var_b] = true;
+        delay(3);
+        break;
+      case 1:
+        Serial.print(var_b);
+        Serial.println(" Released");
+        state[var_b] = false;
+        delay(3);
+        break;
+    }
+  }
+}
