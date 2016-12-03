@@ -1,0 +1,29 @@
+#include <SPI.h>
+
+byte data_1,data_2;
+
+void setup()
+{
+  Serial.begin(9600);
+  SPI.setClockDivider(SPI_CLOCK_DIV128);
+  SPI.setDataMode(SPI_MODE0);
+  SPI.setBitOrder(MSBFIRST);
+  SPI.begin();
+
+  pinMode(10,OUTPUT);
+  digitalWrite(10,HIGH);
+}
+
+void loop()
+{
+  digitalWrite(10,LOW);
+  delay(1);
+  digitalWrite(10,HIGH);
+  data_1 = SPI.transfer(0x00);
+  data_2 = SPI.transfer(0x00);
+
+  Serial.print(data_1,BIN);
+  Serial.print(" ");
+  Serial.println(data_2,BIN);
+  delay(500);
+}
