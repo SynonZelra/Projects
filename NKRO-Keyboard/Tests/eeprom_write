@@ -1,0 +1,25 @@
+#include <Wire.h>
+
+#define address 0x50
+#define savelocation 0
+
+byte data;
+
+void setup()
+{
+  Serial.begin(9600);
+  Wire.begin();
+  data = 37;
+  Wire.beginTransmission(address);
+  Wire.write(savelocation);
+  Wire.write(data);
+  Wire.endTransmission();
+  delay(5);
+  Serial.println("Saved");
+  Serial.print("location: ");
+  Serial.println(savelocation);
+  Serial.print("value: ");
+  Serial.println(data);
+}
+void loop()
+{}
