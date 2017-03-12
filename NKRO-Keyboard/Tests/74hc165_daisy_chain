@@ -1,0 +1,42 @@
+#include <SPI.h>
+
+#define latch 10
+
+byte data_1,data_2;
+int i;
+
+void setup()
+{
+  Serial.begin(9600);
+  SPI.setClockDivider(SPI_CLOCK_DIV128);
+  SPI.setDataMode(SPI_MODE0);
+  SPI.setBitOrder(MSBFIRST);
+  SPI.begin();
+  pinMode(latch,OUTPUT);
+  digitalWrite(latch,HIGH);
+}
+
+void loop()
+{
+  readbutton();
+  for (i=7;i>=0;i--)
+  {
+    Serial.print(bitRead(data_1,i));
+  }
+  Serial.print(" ");
+  for (i=7;i>=0;i--)
+  {
+    Serial.print(bitRead(data_2,i));
+  }
+  Serial.println(" ");
+  delay(1000);
+}
+
+void readbutton()
+{
+  digitalWrite(latch,LOW);
+  delay(1);
+  digitalWrite(latch,HIGH);
+  data_1=SPI.transfer(0x00);
+  data_2=SPI.transfer(0x00);
+}
