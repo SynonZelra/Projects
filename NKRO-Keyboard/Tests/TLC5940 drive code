@@ -1,0 +1,158 @@
+#include <SPI.h> //Serial Peripheral Interface
+
+byte ch=0, chbit=0, spibit=0, spibyte=0; //variables for tlc5940 transfer
+int SINData; //variable for tlc5940 shift
+byte transferbyte[24]; //variable to transfer to tlc5940
+//16 channels in 12 bits, 16*12=192 bits
+//192 bits / 8 = 24 bytes
+byte DCvalue[16]; //variable to dot correction
+int i, j, k, l, m, n; //variables misc
+int x;//test usage
+
+void setup()
+{
+  pinMode(2, OUTPUT); //XLAT
+  pinMode(3, OUTPUT); //OSC2B GSCLK
+  pinMode(4, OUTPUT); //VPRG
+  pinMode(11,OUTPUT); //SPI MOSI
+  pinMode(13,OUTPUT); //SPI Clock
+  //pin setup
+
+  SPI.setBitOrder(MSBFIRST); //Most Significant Bit
+  SPI.setDataMode(SPI_MODE0); //Rising keep clock low
+  SPI.setClockDivider(SPI_CLOCK_DIV4); //Clock at 16 MHz / 4 = 4 MHz
+
+  for (i=0; i<16; i++)
+  {transferbyte[i]=0;}
+  //clear Gray Scale Data
+
+  for (i=0; i<16; i++)
+  {DCvalue[i]=63;}
+  //set dot correction to max
+
+  DotCorrection();
+  //set up dot correction
+
+  noInterrupts();
+  //stop interrupts temporary for counter setup
+
+  TCCR2A = B00010010;
+  //Timer 2 toggle @ 8MHz for pin 5;
+  //GSCLK
+  TCCR2B = B00000001;
+  //Timer pre scale at 16MHz
+
+  TCCR1A = B00000000;
+  //Timer 1 no toggle
+
+  TCCR1B = B00001100;
+  //Timer 1 pre scale at /256
+  //1/8MHz = 125ns, 4096count * 125ns = 512us
+  //16Mhz/256 = 62.5kHz
+
+  TIMSK1 = B00000010;
+
+  OCR1A = 31;
+  //512us interrupt
+
+  interrupts();
+  //setup done, take interrupt back
+
+  for (i=0; i<16; i++)
+  {tlc(i,0);}
+  //clear all outputs
+
+  pinMode(5,OUTPUT);
+  //set up blank
+
+}
+
+void loop()
+{
+  for (x=0;x<4000;x=x+100)
+  {tlc(15,x);
+  delay(50);}
+  for (x=4000;x>=0;x=x-100)
+  {tlc(15,x);
+  delay(50);}
+}
+
+//interrupts
+ISR(TIMER1_OVF_vect){}// Over Limit Flag Interrupt
+
+ISR(TIMER1_COMPB_vect){ }// Compare B - Not Used
+
+ISR(TIMER1_COMPA_vect)
+{ // Interrupt to count 4096 Pulses on GSLCK
+  PORTD |= 1<<5;// write blank HIGH to reset the 4096 counter in the TLC
+  PORTD |= 1<<2;// write XLAT HIGH to latch in data from the last data stream
+  PORTD &= ~(1<<2);  //XLAT can go low now---
+  PORTD &= ~(1<<5);//Blank goes LOW to start the next cycle
+  SPI.end();//end the SPI so we can write to the clock pin
+  PORTB |= 1<<5;// SPI Clock pin to give it the extra count
+  PORTB &= ~(1<<5);// The data sheet says you need this for some reason?
+  SPI.begin();// start the SPI back up
+  for(SINData=23; SINData>=0; SINData--)// send the data out!
+  SPI.transfer(transferbyte[SINData]);
+}
+//interrupts end
+
+void DotCorrection()
+{
+  PORTD |= 1<<4; //VPRG to high to DC Mode
+  spibyte = 0;
+  spibit = 0;
+  //reset variables
+
+  for (ch=0; ch<16; ch++) // 6 bit x 16 outputs
+  {
+    for (chbit=0; chbit<6; chbit++)
+    {
+      if (spibit == 8)
+      {
+        spibyte++;
+        spibit=0;
+      }
+      if (bitRead(DCvalue[ch], chbit)) // through all 6 bits
+      {bitSet(transferbyte[spibyte], spibit);} // set bit of transfer byte
+      else
+      {bitClear(transferbyte[spibyte], spibit);} // clear bit of transfer byte
+      spibit++;
+    }
+  }
+  SPI.begin();
+  for (j=spibyte; j>=0; j--)
+  {SPI.transfer(transferbyte[j]);}
+  PORTD |= 1<<2; //latch up
+  PORTD &= ~(1<<2); //latch down
+  PORTD &= ~(1<<4); //VRPG back to normal
+}
+
+void tlc(int channel, int value)
+{
+  delayMicroseconds(100);
+  //speed control if necessary
+
+  if (bitRead(channel, 0))
+  {spibit = 4;}
+  else
+  {spibit = 0;}
+  //the odd data always start at 4
+  //the even data always start at 0
+
+  spibyte = int(channel*3/2);
+  //start bit
+
+  for (chbit=0; chbit<12; chbit++, spibit++)
+  {
+    if (spibit == 8)
+    {
+      spibyte++;
+      spibit = 0;
+    }
+    if (bitRead(value, chbit))
+    {bitSet(transferbyte[spibyte], spibit);}
+    else
+    {bitClear(transferbyte[spibyte], spibit);}
+  }
+}
