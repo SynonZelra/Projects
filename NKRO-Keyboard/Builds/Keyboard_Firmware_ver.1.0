@@ -61,11 +61,9 @@ void loop()
   //get inputs
   scaninput();
 
-  //check input_1
+  //check input
   for (column=0;column<8;column++)
-  {
-    check(row,column);
-  }
+  {check(row,column);}
   
   //rotate for next check
   if (row==3)
