@@ -1,0 +1,154 @@
+//SPI library
+#include<SPI.h>
+
+//input read bytes
+byte input_1,input_2;
+
+//rows and columns
+const int rowmax = 4;
+const int columnmax = 16;
+
+//key stat array
+bool keystat[rowmax][columnmax];
+
+//row and column to check
+int row,column = 0;
+
+//misc variable
+int i,j;
+
+//setup
+void setup()
+{
+  //shift register latch
+  pinMode(10,OUTPUT);
+  digitalWrite(10,HIGH);
+
+  //row scans
+  pinMode(A0,OUTPUT);
+  pinMode(A1,OUTPUT);
+  pinMode(A2,OUTPUT);
+  pinMode(A3,OUTPUT);
+  digitalWrite(A0,LOW);
+  digitalWrite(A1,LOW);
+  digitalWrite(A2,LOW);
+  digitalWrite(A3,LOW);
+
+  //initital the pos array
+  for (i=1;i<rowmax;i++)
+  {
+    for (j=1;j<columnmax;j++)
+    {
+      keystat[i][j]=false;
+    }
+  }
+
+  //SPI initialization
+  SPI.setClockDivider(SPI_CLOCK_DIV128);
+  SPI.setDataMode(SPI_MODE0);
+  SPI.setBitOrder(MSBFIRST);
+  SPI.begin();
+
+  //Serial for debugging
+  Serial.begin(9600);
+}
+
+void loop()
+{
+  //change row
+  change(row);
+  
+  //get inputs
+  scaninput();
+
+  //check input_1
+  for (column=0;column<8;column++)
+  {
+    check(row,column);
+  }
+  
+  //rotate for next check
+  if (row==3)
+  {row=0;}
+  else
+  {row++;}
+}
+
+void change(int var_row)
+{
+  //change the scan row by row
+  switch (var_row)
+  {
+    case 0:
+      digitalWrite(A3,HIGH);
+      digitalWrite(A0,LOW);
+      break;
+    case 1:
+      digitalWrite(A2,HIGH);
+      digitalWrite(A3,LOW);
+      break;
+    case 2:
+      digitalWrite(A1,HIGH);
+      digitalWrite(A2,LOW);
+      break;
+    case 3:
+      digitalWrite(A0,HIGH);
+      digitalWrite(A1,LOW);
+      break;
+  }
+}
+
+void scaninput()
+{
+  //latch the data in
+  digitalWrite(10,LOW);
+  delay(1);
+  digitalWrite(10,HIGH);
+
+  //send null data to receive input
+  input_1 = SPI.transfer(0x00);
+  input_2 = SPI.transfer(0x00);
+}
+
+void check(int var_r, int var_c)
+{
+  //check input_1
+  if (keystat[var_r][var_c] != bitRead(input_1,var_c))
+  {
+    switch (keystat[var_r][var_c])
+    {
+      case 0:
+        Serial.print(var_r);
+        Serial.print(var_c);
+        Serial.println(" Pressed");
+        keystat[var_r][var_c] = true;
+        break;
+      case 1:
+        Serial.print(var_r);
+        Serial.print(var_c);
+        Serial.println(" Released");
+        keystat[var_r][var_c] = false;
+        break;
+    }
+  }
+
+  //check input_2
+  if (keystat[var_r][var_c+8] != bitRead(input_2,var_c))
+  {
+    switch (keystat[var_r][var_c+8])
+    {
+      case 0:
+        Serial.print(var_r);
+        Serial.print(var_c+8);
+        Serial.println(" Pressed");
+        keystat[var_r][var_c+8] = true;
+        break;
+      case 1:
+        Serial.print(var_r);
+        Serial.print(var_c+8);
+        Serial.println(" Released");
+        keystat[var_r][var_c+8] = false;
+        break;
+    }
+  }
+}
